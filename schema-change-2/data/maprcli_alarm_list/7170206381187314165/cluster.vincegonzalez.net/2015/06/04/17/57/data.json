@@ -1,0 +1,36 @@
+{
+    "data": [
+        {
+            "alarm name": "NODE_ALARM_SERVICE_NFS_DOWN",
+            "alarm state": 1,
+            "alarm statechange time": 1433439779492,
+            "description": "Can not determine if service: nfs is running. Check logs at: /opt/mapr/logs/nfsserver.log",
+            "entity": "node1"
+        },
+        {
+            "alarm name": "NODE_ALARM_SERVICE_NFS_DOWN",
+            "alarm state": 1,
+            "alarm statechange time": 1433431833317,
+            "description": "Can not determine if service: nfs is running. Check logs at: /opt/mapr/logs/nfsserver.log",
+            "entity": "node4"
+        },
+        {
+            "alarm name": "NODE_ALARM_SERVICE_NFS_DOWN",
+            "alarm state": 1,
+            "alarm statechange time": 1433439067671,
+            "description": "Can not determine if service: nfs is running. Check logs at: /opt/mapr/logs/nfsserver.log",
+            "entity": "node3"
+        },
+        {
+            "alarm name": "NODE_ALARM_SERVICE_CLDB_DOWN",
+            "alarm state": 1,
+            "alarm statechange time": 1433440037100,
+            "description": "Can not determine if service: cldb is running. Check logs at: /opt/mapr/logs/cldb.log",
+            "entity": "node2"
+        }
+    ],
+    "status": "OK",
+    "timeofday": "2015-06-04 01:57:31.404 GMT-0400",
+    "timestamp": 1433440651404,
+    "total": 4
+}
