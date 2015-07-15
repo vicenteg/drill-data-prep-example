@@ -1,6 +1,6 @@
 # Scenario
 
-You have data where the schema changes. In this case, the data changes 
+You have data where the schema changes. In this case, the value of a nested part of the data changes from an empty list to a non-empty list.
 
 
 # Sample Data
