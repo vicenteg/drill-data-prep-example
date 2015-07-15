@@ -136,6 +136,24 @@ Now, querying the massaged data, Drill is happier:
 2 rows selected (0.119 seconds)
 ```
 
+More happy queries:
+
+```
+0: jdbc:drill:zk=local> select t.name, t.yum.name as fave_food, flatten(t.yum.flavors) as fave_flave from (select t.name, flatten(t.favorite_foods) as yum from (select name,favorite_foods from `/Users/vince/src/mapr/drill-data-prep/schema-change/data`) t) t;
++--------+----------------+-----------------+
+|  name  |   fave_food    |   fave_flave    |
++--------+----------------+-----------------+
+| Nikki  | ice-cream      | chocolate       |
+| Nikki  | ice-cream      | dulce de leche  |
+| Nikki  | cheeseburgers  | black label     |
+| Vince  | ice-cream      | vanilla         |
+| Vince  | cheeseburgers  | animal style    |
+| Vince  | cheeseburgers  | black label     |
++--------+----------------+-----------------+
+6 rows selected (0.153 seconds)
+```
+
+
 # Interesting(?) note
 
 You get different style of error output when you query a directory of JSON files than when you query a file.
