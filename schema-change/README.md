@@ -23,6 +23,9 @@ This data is split across two files.
     }
   ]
 }
+```
+
+```json
 {
   "name": "Nikki",
   "favorite_foods": [
@@ -44,6 +47,8 @@ This data is split across two files.
 ```
 
 # Query
+
+Both files are valid JSON, and that's good, but it turns out that the schema changes. Vince only like vanilla ice cream, and that's stored as a single value. Nikki likes chocolate and dulce de leche (Vince won't turn those down, just not his favorite) so those are stored as a list. 
 
 Drill would rather you not organize your data this way, and is not shy about telling you so:
 
@@ -70,7 +75,6 @@ Fragment 0:0
 	at sqlline.SqlLine.start(SqlLine.java:366)
 	at sqlline.SqlLine.main(SqlLine.java:259)
 ```
-
 
 What if we reverse the order of these objects in the input? Does Drill like it better when we start it off with a list, then change to a single value?
 
