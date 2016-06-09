@@ -1,3 +1,7 @@
+# Overview
+
+Drill is a fantastic tool for querying JSON data. But Drill isn't magical, and sometimes it runs into some data that it can't quite handle (yet). This post walks through an example of such a scenario, and how you might work through the issue using a little bit of Python code.
+
 # Scenario
 
 You have data where the schema changes. In this example, we look at the case where you have a field that changes from a single value to a list, or vice versa.
@@ -48,15 +52,15 @@ This data is split across two files.
 
 # Query
 
-Both files are valid JSON, and that's good, but it turns out that the schema changes. Vince only like vanilla ice cream, and that's stored as a single value. Nikki likes chocolate and dulce de leche (Vince won't turn those down, just not his favorite) so those are stored as a list. 
+Both files are valid JSON, and that's good, but it turns out that the schema changes. Vince only like vanilla ice cream, and that's stored as a single value. Nikki likes chocolate and dulce de leche (Vince won't turn those down, just not his favorite) so those are stored as a list.
 
 Drill would rather you not organize your data this way, and is not shy about telling you so:
 
 ```
-0: jdbc:drill:zk=local> select * from `/Users/vince/src/mapr/drill-data-prep/schema-change/data`;
+0: jdbc:drill:zk=local> select * from `/Users/vince/src/drill-data-prep-example/schema-change/data`;
 java.lang.RuntimeException: java.sql.SQLException: DATA_READ ERROR: You tried to start when you are using a ValueWriter of type NullableVarCharWriterImpl.
 
-File  /Users/vince/src/mapr/drill-data-prep/schema-change/data/vince.json
+File  /Users/vince/src/drill-data-prep-example/schema-change/data/vince.json
 Record  1
 Line  1
 Column  127
@@ -79,7 +83,7 @@ Fragment 0:0
 What if we reverse the order of these objects in the input? Does Drill like it better when we start it off with a list, then change to a single value?
 
 ```
-0: jdbc:drill:zk=local> select * from `/Users/vince/src/mapr/drill-data-prep/schema-change/data`;
+0: jdbc:drill:zk=local> select * from `/Users/vince/src/drill-data-prep-example/schema-change/data`;
 Error: DATA_READ ERROR: You tried to write a VarChar type when you are using a ValueWriter of type SingleListWriter.
 
 File  /Users/vince/src/mapr/drill-data-prep/schema-change/sample_data.json
@@ -94,9 +98,24 @@ Fragment 0:0
 
 No. Drill is still displeased.
 
+In Drill 1.6, the [union type (experimental)](https://drill.apache.org/docs/json-data-model/#experimental-feature:-heterogeneous-types) can be enabled. This will allow multiple data types to be stored in one field, which might help us work around this issue. So let's enable that, and try it out.
+
+```
+ALTER SESSION SET `exec.enable_union_type` = true;
+0: jdbc:drill:zk=local> select * from `/Users/vince/src/drill-data-prep-example/schema-change/data`;
+Error: Unexpected RuntimeException: java.lang.IllegalArgumentException: The field $offsets$(UINT4:REQUIRED) doesn't match the provided metadata major_type {
+  minor_type: MAP
+  mode: REQUIRED
+}
+<snip>
+. (state=,code=0)
+```
+
+Sadly, this doesn't work either. So let's disable the union type and move on.
+
 # What's the problem?
 
-Drill doesn't like it when you give it data where the type changes from something like a single value to a list, or vice versa. 
+Drill doesn't like it when you give it data where the type changes from something like a single value to a list, or vice versa.
 
 # How do we work around it?
 
@@ -130,7 +149,7 @@ for filename in ("data/vince.json", "data/nikki.json"):
 Now, querying the massaged data, Drill is happier:
 
 ```
-0: jdbc:drill:zk=local> select * from `/Users/vince/src/mapr/drill-data-prep/schema-change/data`;
+0: jdbc:drill:zk=local> select * from `/Users/vince/src/drill-data-prep-example/schema-change/data`;
 +---------------------------------------------------------------------------------------------------------------------+--------+
 |                                                   favorite_foods                                                    |  name  |
 +---------------------------------------------------------------------------------------------------------------------+--------+
@@ -143,7 +162,7 @@ Now, querying the massaged data, Drill is happier:
 More happy queries:
 
 ```
-0: jdbc:drill:zk=local> select t.name, t.yum.name as fave_food, flatten(t.yum.flavors) as fave_flave from (select t.name, flatten(t.favorite_foods) as yum from (select name,favorite_foods from `/Users/vince/src/mapr/drill-data-prep/schema-change/data`) t) t;
+0: jdbc:drill:zk=local> select t.name, t.yum.name as fave_food, flatten(t.yum.flavors) as fave_flave from (select t.name, flatten(t.favorite_foods) as yum from (select name,favorite_foods from `/Users/vince/src/drill-data-prep-example/schema-change/data`) t) t;
 +--------+----------------+-----------------+
 |  name  |   fave_food    |   fave_flave    |
 +--------+----------------+-----------------+
@@ -161,4 +180,3 @@ More happy queries:
 # Interesting(?) note
 
 You get different style of error output when you query a directory of JSON files than when you query a file.
-
